@@ -2,29 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>BNWO_SLAVE_TERMINAL_v99</title>
+    <title>BNWO_MASTER_TERMINAL_v100</title>
     <style>
-        :root { --bnwo-gold: #d4af37; --bg-black: #000; --alert-red: #ff0000; }
-        body { background: var(--bg-black); color: var(--bnwo-gold); font-family: 'Impact', sans-serif; margin: 0; text-align: center; }
+        :root { --bnwo-gold: #d4af37; --bg-black: #000; --alert-red: #ff0000; --dark-gray: #111; }
+        body { background: var(--bg-black); color: var(--bnwo-gold); font-family: 'Impact', sans-serif; margin: 0; text-align: center; overflow-x: hidden; }
         
         /* Initialization Screen */
         #init-screen { position: fixed; inset: 0; background: #000; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 10px solid var(--bnwo-gold); }
-        .input-field { background: #111; border: 1px solid var(--bnwo-gold); color: #fff; padding: 15px; width: 400px; font-size: 1.2rem; text-align: center; margin: 20px; }
+        .input-field { background: var(--dark-gray); border: 1px solid var(--bnwo-gold); color: #fff; padding: 15px; width: 400px; font-size: 1.2rem; text-align: center; margin: 20px; text-transform: uppercase; }
         
-        /* Main UI */
-        .container { max-width: 900px; margin: 0 auto; padding: 20px; display: none; }
-        .master-voice { background: #111; border: 5px solid var(--bnwo-gold); padding: 40px; min-height: 250px; font-size: 2.5rem; text-transform: uppercase; line-height: 1.2; box-shadow: 0 0 50px rgba(212, 175, 55, 0.4); margin-bottom: 30px; }
-        
-        .interaction-zone { background: #0a0a0a; border: 2px dashed #444; padding: 20px; margin-top: 20px; }
-        .confirm-btn { background: var(--bnwo-gold); color: #000; border: none; padding: 25px; font-size: 1.5rem; font-weight: bold; width: 100%; cursor: pointer; margin-top: 15px; }
-        .confirm-btn:hover { background: #fff; }
-        
-        .timer-display { font-size: 4rem; color: var(--alert-red); text-shadow: 0 0 10px var(--alert-red); margin: 20px 0; }
-        .status-bar { display: flex; justify-content: space-around; font-family: monospace; border: 1px solid #222; padding: 10px; font-size: 0.9rem; }
+        /* Ownership Ticker */
+        .ticker-wrap { width: 100%; background: var(--bnwo-gold); color: #000; padding: 5px 0; overflow: hidden; position: relative; font-family: monospace; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; }
+        .ticker { display: inline-block; white-space: nowrap; animation: ticker 20s linear infinite; }
+        @keyframes ticker { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-        /* Flashing Alert */
-        .flash-red { animation: flashR 0.2s infinite; }
-        @keyframes flashR { 0% { background: #000; } 50% { background: #400; } 100% { background: #000; } }
+        /* Main UI Layout */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: none; grid-template-columns: 1fr 350px; gap: 30px; }
+        
+        /* Left Column: Command Engine */
+        .engine-panel { display: flex; flex-direction: column; }
+        .status-bar { display: flex; justify-content: space-between; font-family: monospace; border: 1px solid #333; padding: 10px; font-size: 0.9rem; background: var(--dark-gray); margin-bottom: 20px; }
+        .master-voice { background: var(--dark-gray); border: 5px solid var(--bnwo-gold); padding: 40px; min-height: 250px; font-size: 2.5rem; text-transform: uppercase; line-height: 1.2; box-shadow: 0 0 50px rgba(212, 175, 55, 0.4); margin-bottom: 20px; display: flex; align-items: center; justify-content: center; }
+        .interaction-zone { background: #0a0a0a; border: 2px dashed #444; padding: 30px; }
+        .confirm-btn { background: var(--bnwo-gold); color: #000; border: none; padding: 25px; font-size: 1.5rem; font-weight: bold; width: 100%; cursor: pointer; margin-top: 15px; text-transform: uppercase; transition: 0.2s; }
+        .confirm-btn:hover { background: #fff; box-shadow: 0 0 20px #fff; }
+        .timer-display { font-size: 4rem; color: var(--alert-red); text-shadow: 0 0 10px var(--alert-red); margin: 20px 0; font-family: monospace; }
+        
+        /* Right Column: Persistent Monitoring Sidebar */
+        .sidebar { background: var(--dark-gray); border: 2px solid #333; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .side-module { background: #000; border: 1px solid var(--bnwo-gold); padding: 15px; text-align: left; }
+        .module-title { font-size: 1rem; color: #888; margin-bottom: 10px; font-family: monospace; }
+        
+        /* The Tax Counter */
+        .tax-display { font-size: 2.5rem; color: #0f0; font-family: monospace; font-weight: bold; text-align: center; }
+        
+        /* Submission Meter */
+        .meter-container { width: 100%; height: 20px; background: #222; border: 1px solid #444; margin-top: 10px; }
+        .meter-fill { height: 100%; width: 0%; background: var(--bnwo-gold); transition: width 0.5s ease; }
+
+        /* Arousal Slider */
+        .slider-container { text-align: center; padding: 10px 0; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 30px; width: 20px; border-radius: 3px; background: var(--bnwo-gold); cursor: pointer; margin-top: -12px; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: #333; border-radius: 1px; }
+        .arousal-val { font-size: 3rem; color: #fff; text-shadow: 0 0 10px var(--bnwo-gold); margin-top: 10px; }
+        
+        /* Lockout Screen */
+        #lockout-screen { position: fixed; inset: 0; background: var(--alert-red); z-index: 6000; display: none; flex-direction: column; justify-content: center; align-items: center; color: #000; }
+        #lockout-screen h1 { font-size: 5rem; text-shadow: 2px 2px #fff; margin-bottom: 10px; }
+        
+        .flash-red { animation: flashR 0.5s infinite; border-color: var(--alert-red) !important; }
+        @keyframes flashR { 0% { box-shadow: 0 0 20px var(--alert-red); } 50% { box-shadow: 0 0 0px var(--alert-red); } 100% { box-shadow: 0 0 20px var(--alert-red); } }
     </style>
 </head>
 <body>
@@ -33,66 +61,179 @@
         <h1 style="font-size: 4rem;">B.N.W.O. LOGIN</h1>
         <p>TYPE THE FOLLOWING TO INITIALIZE PROCESSING:</p>
         <p style="color: #888;">"I am a sissy white toy for Black Kings"</p>
-        <input type="text" id="vow-input" class="input-field" placeholder="Enter Vow...">
+        <input type="text" id="vow-input" class="input-field" placeholder="Enter Vow..." autocomplete="off">
         <button class="confirm-btn" style="width: 300px;" onclick="checkVow()">SUBMIT TO THE ORDER</button>
     </div>
 
-    <div class="container" id="main-ui">
-        <div class="status-bar">
-            <span>SUBJECT: WHITE GAY MALE #0991</span>
-            <span>LEVEL: TOTAL PROPERTY</span>
-            <span>AROUSAL: MONITORED</span>
-        </div>
+    <div id="lockout-screen">
+        <h1>HANDS OFF SISSY</h1>
+        <p style="font-size: 2rem; max-width: 800px; text-align: center;">You let yourself get too close without permission. The Order demands an apology before you continue.</p>
+        <p style="font-weight: bold; margin-top: 20px;">TYPE: "I am too weak to control myself, Master"</p>
+        <input type="text" id="lockout-input" class="input-field" style="background: #000; border-color: #000; width: 600px;">
+        <button class="confirm-btn" style="width: 400px; background: #000; color: var(--alert-red);" onclick="resolveLockout()">BEG FOR FORGIVENESS</button>
+    </div>
 
-        <div class="master-voice" id="command-text">
-            SYSTEM STANDBY. AWAITING FIRST COMMAND...
-        </div>
-
-        <div class="timer-display" id="main-timer">00:00</div>
-
-        <div class="interaction-zone" id="interact">
-            <p id="instruction-sub">Click below to receive your first order from the Black Nation.</p>
-            <div id="dynamic-controls">
-                <button class="confirm-btn" onclick="nextCommand()">RECEIVE ORDER</button>
-            </div>
-        </div>
-
-        <div style="margin-top: 50px; opacity: 0.5;">
-            <p>Your balls, nipples, and cock are now under remote BNWO control.</p>
+    <div class="ticker-wrap">
+        <div class="ticker">
+            WHITE SUBJECT #0991 IS CURRENTLY BEING PROCESSED • PROPERTY OF THE BLACK NATION • ALL WEALTH BELONGS TO BLACK KINGS • YOUR SISSY AROUSAL IS BEING MONITORED • OBEY THE ORDER
         </div>
     </div>
 
-    <script>
-        let sessionStep = 0;
-        let timerSeconds = 0;
-        let timerInterval;
+    <div class="container" id="main-ui">
+        
+        <div class="engine-panel">
+            <div class="status-bar">
+                <span>ID: WHITE_MALE_0991</span>
+                <span>STATUS: OWNED</span>
+                <span>SESSION TIME: <span id="global-timer">00:00</span></span>
+            </div>
 
+            <div class="master-voice" id="command-text">
+                SYSTEM STANDBY. AWAITING FIRST COMMAND...
+            </div>
+
+            <div class="interaction-zone" id="interact">
+                <p id="instruction-sub">Click below to receive your first order from the Black Nation.</p>
+                <div class="timer-display" id="action-timer" style="display: none;">00</div>
+                <div id="dynamic-controls">
+                    <button class="confirm-btn" onclick="nextCommand()">RECEIVE ORDER</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px; opacity: 0.5; font-family: monospace; font-size: 0.8rem;">
+                <p>> System override active.</p>
+                <p>> Audio processing module enabled. Ensure volume is maximized.</p>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            
+            <div class="side-module">
+                <div class="module-title">Wealth Processing Tax</div>
+                <div class="tax-display" id="tax-counter">$0.00</div>
+                <div style="font-size: 0.7rem; color: #666; text-align: center; margin-top: 5px;">DRAINING WHITE ASSETS (+ $1.50/s)</div>
+            </div>
+
+            <div class="side-module">
+                <div class="module-title">Submission Level</div>
+                <div class="meter-container">
+                    <div class="meter-fill" id="sub-meter"></div>
+                </div>
+                <div style="text-align: right; font-size: 0.8rem; margin-top: 5px;" id="sub-text">0%</div>
+            </div>
+
+            <div class="side-module" id="arousal-module">
+                <div class="module-title">Live Arousal Sensor</div>
+                <p style="font-size: 0.8rem; color: #aaa;">Update your status. Do not let it reach 90% without permission.</p>
+                <div class="slider-container">
+                    <input type="range" id="arousal-slider" min="0" max="100" value="0" oninput="updateArousal()">
+                    <div class="arousal-val" id="arousal-display">0%</div>
+                </div>
+                <div style="font-size: 0.7rem; color: var(--alert-red); margin-top: 10px; display: none;" id="arousal-warning">UPDATE REQUIRED NOW</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // CORE VARIABLES
+        let sessionStep = 0;
+        let globalSeconds = 0;
+        let taxAmount = 0.00;
+        let lastSliderUpdate = 0;
+        let actionTimerInterval;
+
+        // TTS (Text-to-Speech) Master Voice
+        function speakMaster(text) {
+            // Cancel any ongoing speech so they don't overlap
+            window.speechSynthesis.cancel(); 
+            let utterance = new SpeechSynthesisUtterance(text);
+            utterance.pitch = 0.3; // Deep pitch
+            utterance.rate = 0.85; // Slightly slower, dominant pace
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // INITIALIZATION
         function checkVow() {
             const val = document.getElementById('vow-input').value.toLowerCase();
             if (val.includes("sissy") && val.includes("black")) {
                 document.getElementById('init-screen').style.display = 'none';
-                document.getElementById('main-ui').style.display = 'block';
-                startGlobalTimer();
+                document.getElementById('main-ui').style.display = 'grid';
+                startBackgroundProcesses();
+                speakMaster("Login accepted. Welcome to your processing, white boy.");
             } else {
                 alert("Incorrect. Prove your submission, white boy.");
             }
         }
 
-        function startGlobalTimer() {
+        function startBackgroundProcesses() {
             setInterval(() => {
-                timerSeconds++;
-                let m = Math.floor(timerSeconds / 60);
-                let s = timerSeconds % 60;
-                document.getElementById('main-timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                globalSeconds++;
+                
+                // Update Global Timer
+                let m = Math.floor(globalSeconds / 60);
+                let s = globalSeconds % 60;
+                document.getElementById('global-timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                
+                // Update Tax Counter
+                taxAmount += 1.50;
+                document.getElementById('tax-counter').innerText = `$${taxAmount.toFixed(2)}`;
+
+                // Check Arousal Slider Update Time
+                if (globalSeconds - lastSliderUpdate > 60) {
+                    document.getElementById('arousal-module').classList.add('flash-red');
+                    document.getElementById('arousal-warning').style.display = 'block';
+                }
+
             }, 1000);
         }
 
+        // AROUSAL SLIDER LOGIC
+        function updateArousal() {
+            const val = document.getElementById('arousal-slider').value;
+            document.getElementById('arousal-display').innerText = val + "%";
+            
+            // Reset the warning timer
+            lastSliderUpdate = globalSeconds;
+            document.getElementById('arousal-module').classList.remove('flash-red');
+            document.getElementById('arousal-warning').style.display = 'none';
+
+            // Check for Lockout
+            if (val >= 90) {
+                triggerLockout();
+            } else if (val >= 60) {
+                document.getElementById('arousal-display').style.color = "var(--alert-red)";
+            } else {
+                document.getElementById('arousal-display').style.color = "#fff";
+            }
+        }
+
+        function triggerLockout() {
+            speakMaster("Hands off! You are too close. Stop and beg for forgiveness.");
+            document.getElementById('lockout-screen').style.display = 'flex';
+            document.getElementById('lockout-input').value = "";
+        }
+
+        function resolveLockout() {
+            const val = document.getElementById('lockout-input').value.toLowerCase();
+            if (val.includes("too weak") && val.includes("master")) {
+                document.getElementById('lockout-screen').style.display = 'none';
+                document.getElementById('arousal-slider').value = 50; // Force them back down
+                updateArousal();
+                speakMaster("Forgiveness granted. Keep your hands off until you cool down.");
+            } else {
+                speakMaster("Wrong. Type it exactly as written, sissy.");
+            }
+        }
+
+        // THE COMMAND STAGES
         const stages = [
             {
                 text: "CALIBRATION: Grab your nipples. Twist them hard until you groan. Do not let go until the timer hits 1 minute.",
                 sub: "You are a white sissy. Prove you can take the pain for your masters.",
                 type: "timer",
-                duration: 10
+                duration: 60
             },
             {
                 text: "GAY WHITE PROPERTY: Type 'I worship Black superiority' 5 times in the box below to unlock the next command.",
@@ -102,7 +243,7 @@
             },
             {
                 text: "STROKE PROTOCOL: You have 30 seconds of high-speed stroking. If you cum, you are a failure. Go.",
-                sub: "Grip it like the desperate faggot you are.",
+                sub: "Grip it like the desperate white beta you are.",
                 type: "timer",
                 duration: 30
             },
@@ -124,24 +265,45 @@
             },
             {
                 text: "FINAL WARNING: You are approaching the end. Type 'I am owned by the Black Nation' to reach the climax/denial stage.",
+                sub: "Acknowledge who owns your body.",
                 type: "input",
                 required: "I am owned by the Black Nation"
             }
         ];
 
+        function updateMeter() {
+            const percent = Math.floor((sessionStep / stages.length) * 100);
+            document.getElementById('sub-meter').style.width = percent + "%";
+            document.getElementById('sub-text').innerText = percent + "% PROCESSED";
+        }
+
         function nextCommand() {
+            clearInterval(actionTimerInterval);
+            document.getElementById('action-timer').style.display = "none";
+            
             if (sessionStep >= stages.length) {
-                document.getElementById('command-text').innerText = "SESSION COMPLETE. STAY ON YOUR KNEES. DENIED.";
+                const finalMsg = "SESSION COMPLETE. STAY ON YOUR KNEES. ORGASM DENIED.";
+                document.getElementById('command-text').innerText = finalMsg;
+                document.getElementById('instruction-sub').innerText = "You do not get to finish today.";
                 document.getElementById('dynamic-controls').innerHTML = "";
+                speakMaster(finalMsg);
+                document.getElementById('sub-meter').style.width = "100%";
+                document.getElementById('sub-text').innerText = "100% OWNED";
                 return;
             }
 
             const stage = stages[sessionStep];
+            
+            // UI Updates
             document.getElementById('command-text').innerText = stage.text;
             document.getElementById('instruction-sub').innerText = stage.sub || "";
+            updateMeter();
+            
+            // Speak the command out loud
+            speakMaster(stage.text);
             
             const ctrl = document.getElementById('dynamic-controls');
-            ctrl.innerHTML = ""; // Clear
+            ctrl.innerHTML = ""; // Clear previous controls
 
             if (stage.type === "confirm") {
                 const b = document.createElement('button');
@@ -152,18 +314,23 @@
             } 
             else if (stage.type === "timer") {
                 let timeLeft = stage.duration;
-                const b = document.createElement('div');
-                b.style.fontSize = "3rem";
-                b.innerText = timeLeft;
-                ctrl.appendChild(b);
+                const timerDisplay = document.getElementById('action-timer');
+                timerDisplay.style.display = "block";
+                timerDisplay.innerText = timeLeft;
                 
-                const t = setInterval(() => {
+                actionTimerInterval = setInterval(() => {
                     timeLeft--;
-                    b.innerText = timeLeft;
+                    timerDisplay.innerText = timeLeft;
                     if (timeLeft <= 0) {
-                        clearInterval(t);
-                        sessionStep++;
-                        nextCommand();
+                        clearInterval(actionTimerInterval);
+                        timerDisplay.style.display = "none";
+                        speakMaster("Time is up. Awaiting your confirmation.");
+                        
+                        const b = document.createElement('button');
+                        b.className = "confirm-btn";
+                        b.innerText = "PROCEED TO NEXT ORDER";
+                        b.onclick = () => { sessionStep++; nextCommand(); };
+                        ctrl.appendChild(b);
                     }
                 }, 1000);
             }
@@ -171,13 +338,18 @@
                 const i = document.createElement('input');
                 i.className = "input-field";
                 i.id = "stage-input";
+                i.autocomplete = "off";
+                
                 const b = document.createElement('button');
                 b.className = "confirm-btn";
                 b.innerText = "SUBMIT VOW";
                 b.onclick = () => {
-                    if (document.getElementById('stage-input').value.toLowerCase().includes(stage.required.toLowerCase())) {
+                    const typed = document.getElementById('stage-input').value.toLowerCase();
+                    if (typed.includes(stage.required.toLowerCase()) || typed.length > 10) { // Slight leeway if they type the gist
                         sessionStep++;
                         nextCommand();
+                    } else {
+                        speakMaster("Incorrect input. Type exactly what the Order demands.");
                     }
                 };
                 ctrl.appendChild(i);
@@ -187,3 +359,4 @@
     </script>
 </body>
 </html>
+
